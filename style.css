@@ -1,0 +1,9 @@
+.monitor {
+	background-color: #eee;
+	display: block;
+	margin-bottom: 3px;
+}
+
+#engine {
+	border:2px solid black;
+}

@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>HAF &bull; HTML5 Animation Framework &bull; Benchmark</title>
+		<script src="js/oz.js"></script>
+		<script src="js/haf.js"></script>
+		<script src="js/benchmark.js"></script>
+		<link rel="stylesheet" type="text/css" href="style.css" />
+	</head>
+	<body>
+		Size: <select id="size" onchange="changeSize()">
+			<option value="256x256">256&times;256</option>
+			<option value="512x512">512&times;512</option>
+			<option value="768x512">768&times;512</option>
+			<option value="1024x512">1024&times;512</option>
+			<option value="1024x768">1024&times;768</option>
+			<option value="1024x1024">1024&times;1024</option>
+			<option value="2048x2048">2048&times;2048</option>
+		</select>
+		Actors:	<select id="actors" onchange="changeActors()">
+			<option value="10">10</option>
+			<option value="50">50</option>
+			<option value="250">250</option>
+			<option value="500">500</option>
+			<option value="1000">1000</option>
+			<option value="5000">5000</option>
+			<option value="10000">10000</option>
+		</select>
+		Actor type: <select id="type" onchange="changeType()">
+			<option value="0">Circle</option>
+			<option value="1">Square</option>
+			<option value="2">Square (aligned)</option>
+			<option value="3">Sprite</option>
+			<option value="4">Canvas</option>
+		</select><br/>
+		Clear: <select id="clear" onchange="changeClear()">
+			<option value="0">Whole canvas</option>
+			<option value="1">Nothing</option>
+			<option value="2">Dirty actors</option>
+		</select>
+		Dirty actors: <select id="dirty" onchange="changeDirty()">
+			<option value="0">All</option>
+			<option value="1">Changed only</option>
+		</select>
+		
+		<script>
+		var engine = new HAF.Engine(null, {debug:false});
+		engine.getContainer().id = "engine";
+		document.body.insertBefore(engine.getContainer(), document.body.firstChild);
+		engine.addLayer("main");
+
+		var monitor = new HAF.Monitor.Sim(engine, [500, 100]);
+		document.body.appendChild(monitor.getContainer());
+		
+		var monitor = new HAF.Monitor.Draw(engine, [500, 100]);
+		document.body.appendChild(monitor.getContainer());
+
+		var selectSize = OZ.$("size");
+		var selectActors = OZ.$("actors");
+		var selectType = OZ.$("type");
+		var selectClear = OZ.$("clear");
+		var selectDirty = OZ.$("dirty");
+		var actors = [];
+		
+		var changeSize = function() {
+			var size = selectSize.value.split("x");
+			for (var i=0;i<2;i++) { size[i] = parseInt(size[i]); }
+			engine.setSize(size);
+		}
+
+		var changeActors = function() {
+			var count = parseInt(selectActors.value);
+			if (count < actors.length) { /* remove */
+				while (count < actors.length) {
+					var actor = actors.pop();
+					engine.removeActor(actor, "main");
+				}
+			} else if (count > actors.length) { /* add */			
+				var type = parseInt(selectType.value);
+				for (var i=actors.length;i<count;i++) {
+					var actor = new Benchmark(type);
+					actors.push(actor);
+					engine.addActor(actor, "main");
+				}
+			}
+		}
+		
+		var changeType = function() {
+			var type = parseInt(selectType.value);
+			for (var i=0;i<actors.length;i++) { actors[i].setType(type); }
+		}
+		
+		var changeClear = function() {
+			var clear = parseInt(selectClear.value);
+			engine._layers["main"].clear = clear;
+		}
+
+		var changeDirty = function() {
+			var dirty = parseInt(selectDirty.value);
+			engine._layers["main"].dirty = dirty;
+		}
+
+		changeClear();
+		changeDirty();
+		changeSize();
+		changeActors();
+		/*
+		var a1 = new HAF.Sprite(Benchmark.image, [64, 64]);
+		a1._sprite.position = [100, 100];
+		engine.addActor(a1, "main");
+		a1.tick = function() { return true; }
+
+		var a2 = new HAF.Sprite(Benchmark.image, [64, 64]);
+		a2._sprite.position = [170, 100];
+		engine.addActor(a2, "main");
+
+		var a3 = new HAF.Sprite(Benchmark.image, [64, 64]);
+		a3._sprite.position = [130, 100];
+		engine.addActor(a3, "main");
+		
+		var a4 = new HAF.Sprite(Benchmark.image, [64, 64]);
+		a4._sprite.position = [200, 100];
+		engine.addActor(a4, "main");
+*/
+		engine.start();
+		
+		</script>
+	</body>
+</html>
